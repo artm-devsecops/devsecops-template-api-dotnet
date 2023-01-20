@@ -6,7 +6,6 @@
     <Nullable>enable</Nullable>
     <IsPublishable>false</IsPublishable>
     <IsPackable>false</IsPackable>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
