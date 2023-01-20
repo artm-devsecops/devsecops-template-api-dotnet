@@ -4,13 +4,14 @@ using DevSecOps.Template.API.DotNet.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Moq;
 
 namespace DevSecOps.Template.API.DotNet.Tests.Controllers;
 
 public class ProfileControllerTests
 {
     [Fact]
-    public async void Test()
+    public async void GetBasicProfileReturnsPayload()
     {
         //arrange
         var iamService = new Moq.Mock<IIAMService>();
@@ -25,6 +26,7 @@ public class ProfileControllerTests
 
         // assert
         var action = Assert.IsAssignableFrom<OkObjectResult>(result);
-        Assert.Equal(json, action.Value);        
+        Assert.Equal(json, action.Value);
+        iamService.Verify(x => x.GetBasicProfile(), Times.Once);
     }
 }
