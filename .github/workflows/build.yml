@@ -70,3 +70,18 @@ jobs:
       with:
         recreate: true
         path: code-coverage-results.md
+
+    - name: Publish
+      run: dotnet publish --no-restore --no-build --configuration Release --output published
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Docker build
+      run: |
+        docker build -t  ghcr.io/artm-devsecops/devsecops-template-api-dotnet:latest -f ./Dockerfile ./published/    
+        docker push ghcr.io/artm-devsecops/devsecops-template-api-dotnet:latest
