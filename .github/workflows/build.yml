@@ -40,10 +40,17 @@ jobs:
           --no-restore \
           --configuration Release \
           --verbosity normal \
-          --logger "junit;LogFilePath=results/tests.xml"
+          --logger 'trx;LogFileName=results/tests.trx'
+#   --logger "junit;LogFilePath=results/tests.xml"
 
-    - name: Create test summary
-      uses: test-summary/action@dist
-      with:
-        paths: '**/results/*.xml'
+    # - name: Create test summary
+    #   uses: test-summary/action@dist
+    #   with:
+    #     paths: '**/results/*.xml'
+    #   if: always()
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
       if: always()
+      with:
+        trx_files: "**/results/*.trx"
