@@ -26,10 +26,19 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --no-restore --configuration Release
+      run: |
+        dotnet build \
+          --no-restore \
+          --configuration Release
 
     - name: Test
-      run: dotnet test --no-build --no-restore --verbosity normal --logger "junit;LogFilePath=results/tests.xml"
+      run: |
+        dotnet test \
+          --no-build \
+          --no-restore \
+          --configuration Release \
+          --verbosity normal \
+          --logger "junit;LogFilePath=results/tests.xml"
 
     - name: Create test summary
       uses: test-summary/action@dist
