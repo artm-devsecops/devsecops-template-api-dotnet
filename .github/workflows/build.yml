@@ -16,13 +16,23 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
+    
     - name: Restore dependencies
       run: dotnet restore
+
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --no-restore --configuration Release
+
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --no-restore --verbosity normal --logger "junit;LogFilePath=results/tests.xml"
+
+    - name: Create test summary
+      uses: test-summary/action@dist
+      with:
+        paths: results/**/*.xml
+      if: always()
