@@ -2,10 +2,11 @@
 name: .NET
 
 permissions:
-  checks: write
-  pull-requests: write
-  packages: write
-  contents: write
+  checks: write # Required for CodeCoverageSummary
+  pull-requests: write # Required for CodeCoverageSummary
+  packages: write # Required for Docker
+  contents: read # Required for CodeCoverageSummary 
+  security-events: write # Required for Trivy
 
 on:
   push:
