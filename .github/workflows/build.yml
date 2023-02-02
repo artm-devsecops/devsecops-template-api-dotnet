@@ -24,7 +24,7 @@ jobs:
       checks: write # Required for jacoco-reporter
       pull-requests: write # Required for jacoco-reporter
       contents: read # Required for jacoco-reporter
-    uses: artm-devsecops/artm-workflow-templates/.github/workflows/artm-devsecops-build-java.yml@main
+    uses: artm-devsecops/artm-workflow-templates/.github/workflows/artm-devsecops-build-dotnet.yml@main
     with:
       dotnet_version: 6.0.x
 
