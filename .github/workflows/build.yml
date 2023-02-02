@@ -17,85 +17,28 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
 
-    runs-on: ubuntu-latest
+  build-dotnet-workflow:
+    name: "Build application"
+    permissions:
+      checks: write # Required for jacoco-reporter
+      pull-requests: write # Required for jacoco-reporter
+      contents: read # Required for jacoco-reporter
+    uses: artm-devsecops/artm-workflow-templates/.github/workflows/artm-devsecops-build-java.yml@main
+    with:
+      dotnet_version: 6.0.x
 
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 6.0.x
-    
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: |
-        dotnet build \
-          --no-restore \
-          --configuration Release
-
-    - name: Test
-      run: |
-        dotnet test \
-          --no-build \
-          --no-restore \
-          --configuration Release \
-          --verbosity normal \
-          --logger 'trx;LogFileName=results/tests.trx' \
-          --collect:"XPlat Code Coverage" --results-directory coverage/
-
-    - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v2
-      if: always()
-      with:
-        trx_files: "**/results/*.trx"
-
-    - name: Code Coverage Report
-      uses: irongut/CodeCoverageSummary@v1.3.0
-      with:
-        filename: coverage/**/coverage.cobertura.xml
-        badge: true
-        fail_below_min: true
-        format: markdown
-        hide_branch_rate: false
-        hide_complexity: false
-        indicators: true
-        output: both
-        thresholds: '75 90'
-
-    - name: Add Coverage PR Comment
-      uses: marocchino/sticky-pull-request-comment@v2
-      if: github.event_name == 'pull_request'
-      with:
-        recreate: true
-        path: code-coverage-results.md
-
-    - name: Publish
-      run: dotnet publish --no-restore --no-build --configuration Release --output published
-
-    # - name: Login to GitHub Container Registry
-    #   uses: docker/login-action@v2
-    #   with:
-    #     registry: ghcr.io
-    #     username: ${{ github.actor }}
-    #     password: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Docker build
-      run: docker build -t  ghcr.io/artm-devsecops/devsecops-template-api-dotnet:${{ github.sha }} -f ./Dockerfile ./published/
-
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: 'ghcr.io/artm-devsecops/devsecops-template-api-dotnet:${{ github.sha }}'
-        severity: 'CRITICAL,HIGH'
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-
-    - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        sarif_file: 'trivy-results.sarif'
+  build-image-workflow:
+    name: "Build image"
+    needs: build-dotnet-workflow
+    permissions:
+      packages: write # Required for Container
+      security-events: write # Required for Scanning
+    uses: artm-devsecops/artm-workflow-templates/.github/workflows/artm-devsecops-build-image.yml@main
+    with:
+      artifact_path: "./published"
+      image_tag: "v1"
+      image_context: "./published"
+      image_files: "Dockerfile"
+      container_registry: "ghcr.io"
+      scan_offline: true
